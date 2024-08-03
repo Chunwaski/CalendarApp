@@ -26,7 +26,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/fireba
                     await signOut(auth);
                     console.log('User signed out successfully.');
                     // Optionally redirect to login page or show a message
-                    window.location.href = 'login.html'; // Replace with your login page URL
+                    window.location.href = 'index.html'; // Replace with your login page URL
                 } catch (error) {
                     console.error('Error signing out:', error);
                 }
