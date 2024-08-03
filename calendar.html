@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar</title>
+    <link rel="stylesheet" href="calendar.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+    <script type="text/javascript"
+        src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js">
+</script>
+<script type="text/javascript">
+   (function(){
+      emailjs.init({
+        publicKey: "z9O8HF_FKOhw5z8Wz",
+      });
+   })();
+</script>
+</head>
+<body>
+    <div id="navbar"></div>
+    <div class="wrapper">
+        <header>
+            <p class="current-date"></p>
+            <div class="icons">
+                <span id="prev" class="material-symbols-rounded">chevron_left</span>
+                <span id="next" class="material-symbols-rounded">chevron_right</span>
+            </div>
+        </header>
+        <div class="calendar">
+            <ul class="weeks">
+                <li>Sun</li>
+                <li>Mon</li>
+                <li>Tues</li>
+                <li>Wed</li>
+                <li>Thu</li>
+                <li>Fri</li>
+                <li>Sat</li>
+            </ul>
+            <ul class="days">
+            </ul>
+        </div>
+    </div>
+    <div class="question-wrapper">
+        <header>
+            <p>Do you want to submit an absence leave form?</p>
+        </header>
+        <button id="yesButton">Yes</button>
+        <button id="noButton">No</button>
+    </div>
+    <div class="form-wrapper">
+        <header>
+            <p>Absence Leave Form</p>
+        </header>
+        <form id="myForm">
+            <label for="name"><strong>Name:</strong></label>
+            <input type="text" id="name" name="name" required>
+            <label for="grade"><strong>Grade:</strong></label>
+            <input type="text" id="grade" name="grade" required>
+            <label for="selectedDates"><strong>Date:</strong></label>
+            <span id="selectedDates"></span>
+            <label for="reason"><strong>Reason:</strong></label>
+            <select id="reason" name="reason" onchange="showHideCertificate()">
+                <option value="" disabled selected>Choose your reason</option>
+                <option value="sickness">Sickness</option>
+                <option value="competitions">Competitions</option>
+                <option value="personal">Personal issues</option>
+                <option value="events">External events</option>
+                <option value="others">Others</option>
+            </select>
+    
+            <label id="certificateLabel" for="certificate">
+                <strong>Attach medical certificate </strong><span class="bracket">(For extended leaves)</span>:
+            </label>
+            <div id="certificateDiv">
+                <label class="custom-file-label" for="certificate" id="fileNameLabel">Choose File</label>
+                <input type="file" class="custom-file-input" id="certificate" name="certificate" onchange="updateFileName()">
+            </div>
+            
+            <label for="additionalInfo">
+                <strong>Additional Information</strong> <span class="bracket">(Optional)</span>:
+            </label>
+            <input type="text" id="additionalInfo" name="additionalInfo">
+            <input type="submit" id="submit" value="Submit">
+        </form>
+    </div>
+    <span id="next-page" class="material-symbols-rounded">chevron_right</span>
+    <div class="completed-message" id="completedMessage">
+        <img src="checkmark.png" alt="Checkmark">
+        Your form has been submitted successfully.
+    </div>
+    <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyARVI4voC-ucxjj0XZRKtj9B_cRZokpwLg",
+    authDomain: "calendarapp-d5f9c.firebaseapp.com",
+    databaseURL: "https://calendarapp-d5f9c-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "calendarapp-d5f9c",
+    storageBucket: "calendarapp-d5f9c.appspot.com",
+    messagingSenderId: "208301182287",
+    appId: "1:208301182287:web:4eac8808801ad82bd8893a",
+    measurementId: "G-5BPVYWCBMW"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
+
+const currentDate = document.querySelector(".current-date"),
+    daysTag = document.querySelector(".days"),
+    prevNextIcon = document.querySelectorAll(".icons span");
+
+let date = new Date(),
+    currYear = date.getFullYear(),
+    currMonth = date.getMonth(),
+    selectedDates = []; // Store the selected dates
+let disabledDates = []; // Store the disabled dates
+let excusedDates = []; // Store the excused dates
+let holidayDates = []; // Store the holiday dates
+
+const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+fetch('navbar.html')
+    .then(response => response.text())
+    .then(data => {
+        document.getElementById('navbar').innerHTML = data;
+    });
+
+const formatDate = (date) => {
+    let d = new Date(date);
+    let month = '' + (d.getMonth() + 1);
+    let day = '' + d.getDate();
+    let year = d.getFullYear();
+
+    if (month.length < 2) month = '0' + month;
+    if (day.length < 2) day = '0' + day;
+
+    return [year, month, day].join('-');
+};
+
+const fetchHolidays = async () => {
+    const holidaysRef = ref(db, 'holidays');
+    const snapshot = await get(holidaysRef);
+
+    if (snapshot.exists()) {
+        const holidays = snapshot.val();
+        holidayDates = [];
+
+        for (let key in holidays) {
+            let holiday = holidays[key];
+            let startDate = new Date(holiday.year, holiday.monthStart - 1, holiday.dayStart);
+            let endDate = new Date(holiday.year, holiday.monthEnd - 1, holiday.dayEnd);
+
+            while (startDate <= endDate) {
+                holidayDates.push(formatDate(startDate));
+                startDate.setDate(startDate.getDate() + 1);
+            }
+        }
+    }
+};
+
+const renderCalendar = async () => {
+    await getDisabledDates(); // Fetch the disabled dates before rendering the calendar
+    await fetchHolidays(); // Fetch the holidays before rendering the calendar
+
+    let firstDayofMonth = new Date(currYear, currMonth, 1).getDay();
+    let lastDateofMonth = new Date(currYear, currMonth + 1, 0).getDate();
+    let lastDayofMonth = new Date(currYear, currMonth, lastDateofMonth).getDay();
+    let lastDateofLastMonth = new Date(currYear, currMonth, 0).getDate();
+
+    let liTag = ""; // Initialize liTag inside the function
+    let today = new Date();
+    let firstSchoolDay = new Date(2024, 7, 12); // July 1st, 2024
+
+    // Adding the days of the previous month
+    for (let i = firstDayofMonth; i > 0; i--) {
+        liTag += `<li class="inactive">${lastDateofLastMonth - firstDayofMonth + i}</li>`;
+    }
+
+    for (let i = 1; i <= lastDateofMonth; i++) {
+        let currentDay = new Date(currYear, currMonth, i);
+        let isSelected = selectedDates.some(d => d.getDate() === i && d.getMonth() === currMonth && d.getFullYear() === currYear) ? "selected" : "";
+        let isDisabled = disabledDates.includes(formatDate(currentDay)) ? "disabled" : "";
+        let isExcused = excusedDates.includes(formatDate(currentDay)) ? "excused" : "";
+        let isHoliday = holidayDates.includes(formatDate(currentDay)) ? "holiday" : "";
+        let isWeekend = currentDay.getDay() === 0 || currentDay.getDay() === 6 ? "weekend inactive" : "";
+        let isPast = currentDay < date ? "inactive" : "";
+        let isPresent = currentDay >= firstSchoolDay && currentDay < today && !isDisabled && !isExcused && !isWeekend ? "present" : "";
+        let isToday = i === today.getDate() && currMonth === today.getMonth() && currYear === today.getFullYear() ? "active" : "";
+
+        // Construct the class string with priority for weekend
+        let classString = `${isWeekend} ${isSelected} ${isDisabled} ${isExcused} ${isHoliday} ${isPast} ${isPresent} ${isToday}`;
+        
+        // Add li element
+        liTag += `<li class="${classString.trim()}" data-date="${i}">${i}</li>`;
+    }
+
+    for (let i = 1; i <= 6 - lastDayofMonth; i++) {
+        liTag += `<li class="inactive">${i}</li>`;
+    }
+
+    currentDate.innerText = `${months[currMonth]} ${currYear}`;
+    daysTag.innerHTML = liTag;
+
+    const allDays = document.querySelectorAll(".days li:not(.inactive):not(.disabled):not(.excused):not(.holiday)");
+    allDays.forEach(day => {
+        day.addEventListener("click", () => {
+            if (!day.classList.contains("disabled")) {
+                let clickedDate = new Date(currYear, currMonth, parseInt(day.dataset.date));
+                if (selectedDates.some(d => d.getTime() === clickedDate.getTime())) {
+                    // If date is already selected, remove it
+                    selectedDates = selectedDates.filter(d => d.getTime() !== clickedDate.getTime());
+                    day.classList.remove('selected');
+                } else {
+                    // If date is not selected, add it
+                    selectedDates.push(clickedDate);
+                    day.classList.add('selected');
+                }
+
+                updateSelectedDatesDisplay();
+            }
+        });
+    });
+};
+
+const updateSelectedDatesDisplay = () => {
+    const selectedDatesDisplay = document.getElementById('selectedDates');
+    const formattedDates = selectedDates.map(date => date.toLocaleDateString()).join(', ');
+    selectedDatesDisplay.textContent = formattedDates;
+};
+
+const getDisabledDates = async () => {
+    const user = auth.currentUser;
+
+    if (user) {
+        const userId = user.uid;
+
+        // Reference to the user's data in Firebase
+        const userRef = ref(db, `users/${userId}`);
+
+        try {
+            // Get the current user data
+            const snapshot = await get(userRef);
+            if (snapshot.exists()) {
+                const currentData = snapshot.val();
+                disabledDates = currentData.dates_absent || [];
+                excusedDates = currentData.excused_absent || [];
+                console.log("Disabled and excused dates fetched: ", disabledDates, excusedDates);
+            } else {
+                console.log("User data does not exist.");
+            }
+        } catch (error) {
+            console.error("Error getting disabled dates:", error);
+        }
+    } else {
+        console.log("No user is signed in.");
+    }
+};
+
+const updateAbsentDays = async () => {
+    const user = auth.currentUser;
+
+    if (user) {
+        const userId = user.uid;
+        const formattedSelectedDates = selectedDates.map(date => formatDate(date)); // Use formatDate function
+
+        // Reference to the user's data in Firebase
+        const userRef = ref(db, `users/${userId}`);
+
+        try {
+            // Get the current user data
+            const snapshot = await get(userRef);
+            if (snapshot.exists()) {
+                const currentData = snapshot.val();
+                const currentDatesAbsent = currentData.dates_absent || [];
+                const currentExcusedDates = currentData.excused_absent || [];
+
+                const reason = document.getElementById("reason").value;
+                const hasCertificate = document.getElementById("certificate").files.length > 0;
+
+                let updatedDatesAbsent = [...currentDatesAbsent, ...formattedSelectedDates];
+                let updatedExcusedDates = currentExcusedDates;
+
+                if ((reason === "sickness" && hasCertificate)||reason=== "competitions") {
+                    updatedExcusedDates = Array.from(new Set([...currentExcusedDates, ...formattedSelectedDates]));
+                }
+
+                // Update the user data
+                await update(userRef, {
+                    dates_absent: updatedDatesAbsent,
+                    excused_absent: updatedExcusedDates
+                });
+                console.log("Number of absent days and excused dates updated successfully.");
+            } else {
+                console.log("User data does not exist.");
+            }
+        } catch (error) {
+            console.error("Error updating absent days:", error);
+        }
+    } else {
+        console.log("No user is signed in.");
+    }
+};
+
+// Initialize calendar rendering
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        renderCalendar();
+    } else {
+        console.log("No user is signed in.");
+    }
+});
+
+prevNextIcon.forEach(icon => {
+    icon.addEventListener("click", () => {
+        currMonth = icon.id === "prev" ? currMonth - 1 : currMonth + 1;
+
+        if (currMonth < 0) {
+            currMonth = 11;
+            currYear--;
+        } else if (currMonth > 11) {
+            currMonth = 0;
+            currYear++;
+        }
+
+        renderCalendar();
+    });
+});
+
+document.getElementById('next-page').addEventListener('click', function() {
+    document.querySelector('.wrapper').style.display = 'none';
+    document.querySelector('.question-wrapper').style.display = 'block';
+    document.getElementById('next-page').style.display = 'none';
+});
+
+document.getElementById('yesButton').addEventListener('click', function() {
+    document.querySelector('.question-wrapper').style.display = 'none';
+    document.querySelector('.form-wrapper').style.display = 'block';
+});
+
+document.getElementById('noButton').addEventListener('click', async function() {
+    await updateAbsentDays(); // Save selected absent days
+    window.location.href = 'home.html'; // Redirect to home page
+});
+
+
+document.getElementById('reason').addEventListener('change', function() {
+    showHideCertificate()
+})  
+
+function showHideCertificate() {
+    var reason = document.getElementById("reason").value;
+    var certificateDiv = document.getElementById("certificateDiv");
+    var certificateLabel = document.getElementById("certificateLabel");
+
+    if (reason === "sickness") {
+        certificateDiv.style.display = "block";
+        certificateLabel.style.display = "block";
+    } else {
+        certificateDiv.style.display = "none";
+        certificateLabel.style.display = "none";
+    }
+}
+
+function updateFileName() {
+    var fileInput = document.getElementById('certificate');
+    var fileNameLabel = document.getElementById('fileNameLabel');
+
+    if (fileInput.files.length > 0) {
+        var fileName = fileInput.files[0].name;
+        fileNameLabel.textContent = fileName;
+
+        // Disable the file input and remove hover effect
+        fileInput.disabled = true;
+        fileInput.classList.add('disabled');
+        fileNameLabel.classList.add('disabled');
+    } else {
+        fileNameLabel.textContent = 'Choose File';
+    }
+}
+
+let globalUsername = "";
+let globalEmail = "";
+
+async function fetchUserData() {
+    const user = auth.currentUser;
+
+    if (user) {
+        const userId = user.uid;
+        const userRef = ref(db, `users/${userId}`);
+        const snapshot = await get(userRef);
+
+        if (snapshot.exists()) {
+            const userData = snapshot.val();
+            globalUsername = userData.username;
+            globalEmail = userData.email;
+            console.log("User data fetched successfully:", globalUsername, globalEmail);
+        } else {
+            console.log("No data available for user.");
+        }
+    } else {
+        console.log("No user is signed in.");
+    }
+}
+
+// Call fetchUserData when the auth state changes
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        fetchUserData();
+    } else {
+        console.log("User is signed out.");
+    }
+});
+const serviceID = "service_bdt9fhj";
+const templateID = "template_cz6hq9j";
+
+document.getElementById('myForm').addEventListener('submit', function(event) {
+    event.preventDefault(); 
+
+    document.querySelector('.form-wrapper').style.display = 'none';
+    document.querySelector('.completed-message').style.display = 'block';
+
+    const params = {
+        name: document.getElementById("name").value,
+        grade: document.getElementById("grade").value,
+        dates: document.getElementById("selectedDates").textContent,
+        reason: document.getElementById("reason").value,
+        username: globalUsername,
+        email: globalEmail
+    };
+
+    emailjs.send(serviceID, templateID, params)
+    updateAbsentDays();
+});
+
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Form</title>
+    <link rel="stylesheet" href="addevent.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">  
+    <script type="text/javascript"
+        src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js">
+</script>
+<script type="text/javascript">
+   (function(){
+      emailjs.init({
+        publicKey: "z9O8HF_FKOhw5z8Wz",
+      });
+   })();
+</script>
+<script src="addevent.js"></script>
+</head>
+<body>
+    <div id="navbar"></div>
+    <div class="form-wrapper">
+        <header>
+            <p>Event Form</p>
+        </header>
+        <form id="myForm">
+            <label for="name"><strong>Name:</strong> <span class="bracket">(Organization or members)</span></label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="grade"><strong>Grade:</strong></label>
+            <input type="text" id="grade" name="grade" required>
+
+            <label for="date"><strong>Date:</strong></label>
+            <input type="text" id="date" name="date" required>
+
+            <label for="time"><strong>Time:</strong></label>
+            <input type="text" id="time" name="time" required>
+
+            <label for="venue"><strong>Venue:</strong></label>
+            <input type="text" id="venue" name="venue" required>
+
+            <label for="description"><strong>Description:</strong></label>
+            <textarea id="description" name="description" rows="5" cols="50" placeholder="Description of your event" required></textarea>
+            
+            <input type="submit" id="submit" value="Submit">
+        </form>
+    </div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+        import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-database.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyARVI4voC-ucxjj0XZRKtj9B_cRZokpwLg",
+            authDomain: "calendarapp-d5f9c.firebaseapp.com",
+            databaseURL: "https://calendarapp-d5f9c-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "calendarapp-d5f9c",
+            storageBucket: "calendarapp-d5f9c.appspot.com",
+            messagingSenderId: "208301182287",
+            appId: "1:208301182287:web:4eac8808801ad82bd8893a",
+            measurementId: "G-5BPVYWCBMW"
+        };
+        
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const auth = getAuth(app);
+
+        let globalUsername = "";
+        let globalEmail = "";
+
+        async function fetchUserData() {
+            const user = auth.currentUser;
+
+            if (user) {
+                const userId = user.uid;
+                const userRef = ref(db, `users/${userId}`);
+                const snapshot = await get(userRef);
+
+                if (snapshot.exists()) {
+                    const userData = snapshot.val();
+                    globalUsername = userData.username;
+                    globalEmail = userData.email;
+                    console.log("User data fetched successfully:", globalUsername, globalEmail);
+                } else {
+                    console.log("No data available for user.");
+                }
+            } else {
+                console.log("No user is signed in.");
+            }
+        }
+
+        // Call fetchUserData when the auth state changes
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                fetchUserData();
+            } else {
+                console.log("User is signed out.");
+            }
+        });
+
+        const serviceID = "service_bdt9fhj";
+        const templateID = "template_fxacgkk";
+
+        document.getElementById('myForm').addEventListener('submit', function(event) {
+            event.preventDefault(); 
+
+            const params = {
+                name: document.getElementById("name").value,
+                grade: document.getElementById("grade").value,
+                date: document.getElementById("date").value,
+                time: document.getElementById("time").value,
+                venue: document.getElementById("venue").value,
+                description: document.getElementById("description").value,
+                username: globalUsername,
+                email: globalEmail
+            };
+
+            emailjs.send(serviceID, templateID, params)
+
+        });
+    </script>
+</body>
+</html>
+</body>

@@ -1,0 +1,375 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins', sans-serif;
+}
+
+body{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height:100vh;
+    background: #9b9b9b;
+}
+
+.wrapper {
+    width: 600px;
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px; /* Optional: add some padding for better spacing */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+.wrapper header{
+    display:flex;
+    align-items:center;
+    padding: 25px 30px 10px;
+    margin-top: 10px;
+    margin-left: 20px;
+    justify-content: space-between;
+}
+
+header .current-date{
+    font-size: 1.45rem;
+    font-weight: 500;
+}
+
+header .icons span{
+    height: 38px;
+    width: 38px;
+    color: #878787;
+    font-size: 1.9rem;
+    margin: 0 1px;
+    cursor:pointer; 
+    text-align:center;  
+    line-height:38px;
+    border-radius: 50%;
+}
+
+header .icons span:hover{
+    background: #f2f2f2;
+}
+
+header .icons span:last-child{
+    margin-right: -10px;
+}
+
+.calendar{
+    padding: 20px;
+}
+
+.calendar ul{
+    display:flex;
+    list-style:none;
+    flex-wrap:wrap;
+    text-align:center;
+}
+
+.calendar .days li{
+    margin-bottom: 20px;
+}
+
+.calendar .weeks li{
+    font-weight:500;
+}
+
+.calendar ul li{
+    position: relative;
+    width: calc(100%/7);
+}
+
+.calendar .days li {
+    z-index:1;
+    cursor:pointer;
+    margin-top: 30px;
+}
+
+.days li.inactive{
+    color: #aaa;
+}
+
+.days li.active{
+    color: #fff;
+}
+
+.days li.selected{
+    color: #fff;
+}
+
+.days li.disabled {
+    pointer-events: none; 
+    color: #333;
+}
+
+.days li.holiday {
+    color:#aaa;
+}
+
+.calendar .days li::before{
+    position:absolute;
+    content: "";
+    height:40px;
+    width:40px;
+    top:50%;
+    left:50%;
+    border-radius: 50%;
+    z-index:-1;
+    transform: translate(-50%, -50%);
+}
+
+.days li:hover::before{
+    background:#f2f2f2;
+}
+
+.days li.active::before{
+    background: #777777 !important;
+}
+
+.days li.selected::before {
+    background: #8b6aff;
+}
+
+.days li.disabled::before{
+    background:#f8e0e0;
+}
+
+.days li.excused::before {
+    background: #fdefd5; 
+}
+
+.days li.present::before{
+    background: #e1fce4
+}
+
+.days li.weekend::before{
+    background:transparent !important;
+}
+
+.days li.weekend:hover::before {
+    background: transparent;
+}
+
+.days li.holiday::before {
+    pointer-events: none;
+    background: #ebebeb;
+
+}
+
+#next-page {
+    height: 38px;
+    width: 38px;
+    color: #1d1d1d;
+    font-size: 1.9rem;
+    margin: 0 1px;
+    cursor: pointer;
+    text-align: center;
+    line-height: 38px;
+    border-radius: 50%;
+    margin-left: 30px; 
+}
+
+#next-page:hover {
+    background: #f2f2f2;
+}
+.question-wrapper {
+    display: none; /* Initially hidden */
+    padding: 30px; 
+    margin: 20px; 
+    width: 30%;
+    border-radius: 10px;
+    background-color: #f9f9f9; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+}
+
+.question-wrapper {
+    display: none; /* Initially hidden */
+    padding: 30px; 
+    margin: 20px auto; 
+    width: 30%;
+    border-radius: 10px;
+    background-color: #f9f9f9; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+    text-align: center; /* Center align text */
+}
+
+.question-wrapper header {
+    font-size: 1.45rem;
+    font-weight: 500;
+    padding-bottom: 30px;
+}
+
+.question-wrapper button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #8b6aff;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 100px; /* Fixed width for buttons */
+    margin: 5px; /* Margin between buttons */
+}
+
+.question-wrapper button:hover {
+    background-color: #6f53cc;
+}
+
+.form-wrapper {
+    display: none;
+    padding: 30px; 
+    margin: 20px; 
+    width: 30%;
+    border-radius: 10px;
+    background-color: #f9f9f9; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+form label {
+    margin-bottom: 5px;
+}
+
+form input, form textarea {
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 100%;
+}
+
+form textarea {
+    resize: none;
+}
+
+header {
+    font-size: 1.45rem;
+    font-weight: 500;
+    padding-bottom: 20px;
+}
+
+form select {
+    background: #fff;
+    cursor: pointer;
+}
+
+form input[type="submit"] {
+    padding : 10px;
+    background-color: #8b6aff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 500;   
+}
+
+form input[type="submit"]:hover {
+    background-color: #6f53cc;
+}
+
+form select {
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 100%;
+}
+
+input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+#certificateDiv {
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px dashed #ccc;
+    border-radius: 5px;
+    background-color: #eef;
+    text-align: center; /* Center align the content inside the div */
+    display: none; /* Initially hide the div */
+}
+
+#certificateLabel {
+    margin-bottom: 5px;
+    display: none; /* Initially hide the label */
+}
+
+.custom-file-input {
+    display: none;
+}
+
+.custom-file-label {
+    display: inline-block;
+    background-color: #8b6aff;
+    color: white;
+    padding: 6px 12px;
+    cursor: pointer;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.custom-file-label:hover {
+    background-color: #6f53cc;
+}
+
+.custom-file-input:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.custom-file-input.disabled {
+    cursor: not-allowed;
+}
+
+.custom-file-label.disabled {
+    background-color: #e9ecef; 
+    color: rgb(87, 85, 85);
+    cursor: not-allowed;
+    pointer-events: none; 
+}
+
+.bracket {
+    color: #868686;
+}
+
+
+#selectedDates {
+    padding: 5px; /* Internal spacing */
+    margin-bottom: 20px; /* External spacing */
+    background-color: #F3E5F5;
+    border-radius: 5px;
+    display: inline-block;
+}
+
+.completed-message {
+    width: 30%;
+    display: none;
+    font-size: 1.5em;
+    color: rgb(78, 78, 78);
+    text-align: center;
+    padding: 40px;
+    border-radius: 10px;
+    background-color: #f9f9f9; 
+    margin: 20px;
+}
+
+.completed-message img {
+    width: 25%; /* Adjust size of the checkmark image */
+    height: 25%;
+    display: block;
+    margin: 0 auto 10px; 
+    padding-bottom: 20px
+}
+
+#submit{
+    margin-top: 20px
+}

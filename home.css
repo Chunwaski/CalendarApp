@@ -1,0 +1,162 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+.parent-container {
+    background: #fff; 
+    border-radius: 20px;
+    width: 90%;
+    max-width: 1200px; 
+    margin: 120px auto; 
+    padding: 40px; 
+}
+
+.header-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 40px; 
+    width: 100%;
+    margin-top: 30px;
+}
+
+.header-wrapper h2 {
+    margin: 0;
+    font-size: 24px;
+    color: #333;
+}
+
+.boxes-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%; 
+    margin-bottom: 30px;
+}
+
+.additional-box {
+    position: relative;
+    background: #e6e6e6; 
+    width: 200px; 
+    height: 150px; 
+    padding: 1rem;
+    border-radius: 20px; 
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#presentbox {
+    background-color: #def8df; 
+}
+
+#presenttext h3,#present-count{
+    color:#052206
+}
+
+#absentbox {
+    background-color: #fddfdd; /* Red */
+}
+
+#absenttext h3,#absent-count{
+    color:#300705
+}
+
+#excusedbox {
+    background-color: #ffefd7; /* Orange */
+}
+
+#excusedtext h3,#excused-absence{
+    color:#2b1d09
+}
+
+#attendancetext h3{
+    color: #1f1e1e
+}
+
+
+.text-container h3 {
+    font-size: 18px;
+    color: #555;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.text-container h1 {
+    font-size: 48px;
+    color: #333; 
+    margin: 0;
+    text-align: center;
+}
+
+.attendance-message{
+    font-size: 20px;
+    margin-bottom: 40px;
+    text-align: center;
+}
+.main-title {
+    font-size: 25px;
+    margin-bottom: 20px;
+    color: #241364
+}
+
+.tabular-wrapper {
+    width: 100%; 
+}
+
+.table-container {
+    width: 100%;
+    max-width: 1200px; 
+    margin: 0 auto; 
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    max-width: 1200px; 
+    border-collapse: collapse;
+    margin: 0 auto;
+}
+
+thead {
+    background: #8b6aff;
+    color: #fff;
+}
+
+th {
+    padding: 15px;
+    text-align: left;
+}
+
+tbody {
+    background: #f2f2f2;
+}
+
+td {
+    padding: 15px;
+    font-size: 14px;
+    color: #333;
+}
+
+tr:nth-child(even) {
+    background: #fff;
+}
+
+tfoot {
+    background: rgba(113,99,186,255);
+    font-weight: bold;
+    color: #fff;
+}
+
+.table-container button {
+    color: #8b6aff;
+    background: none;
+    cursor: pointer;
+}

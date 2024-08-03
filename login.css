@@ -1,0 +1,159 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: #9b9b9b;
+}
+
+.main {
+    width: 450px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.signup, .login {
+    padding: 30px;
+    display: none;
+}
+
+.signup.active, .login.active {
+    display: block;
+}
+
+.signup {
+    background: none; /* Remove the background */
+}
+
+.login {
+    background: #fff; /* Background for login form */
+}
+
+.signup form, .login form {
+    display: flex;
+    flex-direction: column;
+}
+
+.signup form label, .login form label {
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #333;
+}
+
+.signup form input, .login form input {
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 100%;
+}
+
+.signup form input::placeholder, .login form input::placeholder {
+    color: #999;
+}
+
+.signup form button, .login form button {
+    padding: 10px;
+    background-color: #8b6aff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+.signup form button:hover, .login form button:hover {
+    background-color: #6f53cc;
+}
+
+.main label {
+    cursor: pointer;
+    text-align: center;
+    display: block;
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #333;
+}
+
+
+.link {
+    margin-top: 15px;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.link button {
+    background: none;
+    border: none;
+    color:  #8b6aff;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.link button:hover {
+    color: #6f53cc;
+}
+
+#show-login{
+    color: #333;
+    background-color: #fff;
+}
+
+#show-signup{
+    color: #333;
+    background-color: #fff;
+}
+
+.custom-alert {
+    position: fixed;
+    top: 20px; /* Move to the top */
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 15px;
+    background-color: #333;
+    color: #fff;
+    border-radius: 5px;
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: 90%;
+    width: 450px; /* Adjust width as needed */
+}
+.custom-alert.hidden {
+    display: none;
+}
+.custom-alert-content {
+    text-align: center;
+}
+.custom-alert-button {
+    background-color:   #f44336; /* Red button */
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: block;
+    font-size: 14px;
+    margin: 10px auto 0; /* Center and space out from the text */
+    cursor: pointer;
+    border-radius: 5px;
+    outline: none;
+}
+.custom-alert-button:hover {
+    background-color: #c62828; /* Darker red on hover */
+}

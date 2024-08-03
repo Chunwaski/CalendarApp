@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home</title>
+    <link rel="stylesheet" href="home.css" />
+    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css" />
+    <script src="home.js" defer></script>
+</head>
+<body>
+    <div id="navbar"></div>
+
+    <div class="parent-container">
+        <div class="header-wrapper"> 
+            <h2 id="welcome">Welcome!</h2>
+        </div>
+        <div class="boxes-container" >
+            <div class="additional-box" id="presentbox">
+                <div class="text-container" id="presenttext">
+                    <h3>Present</h3>
+                    <h1 id="present-count">0</h1>
+                </div>
+            </div>
+            <div class="additional-box" id="absentbox">
+                <div class="text-container" id="absenttext">
+                    <h3>Absent</h3>
+                    <h1 id="absent-count">0</h1>
+                </div>
+            </div>
+            <div class="additional-box" id="excusedbox">
+                <div class="text-container" id="excusedtext">
+                    <h3>Excused Absence</h3>
+                    <h1 id="excused-absence">0</h1>
+                </div>
+            </div>
+            <div class="additional-box" id="attendancebox">
+                <div class="text-container" id="attendancetext">
+                    <h3>Attendance</h3>
+                    <h1 id="attendance-percentage">0%</h1>
+                </div>
+            </div>
+        </div>
+        <div class="attendance-message" id="attendance-message">
+            <!-- Message will be dynamically inserted here -->
+        </div>
+        <div class="tabular-wrapper">
+            <h3 class="main-title">Upcoming Events</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Name</th>
+                            <th>Grade Levels</th>
+                            <th>Time</th>
+                            <th>Type</th>
+
+                        </tr>
+                    </thead>
+                    <tbody id="events-table-body">
+                        <!-- Events will be dynamically inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-analytics.js";
+        import { getDatabase, ref, get, query, orderByChild, limitToFirst } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-database.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyARVI4voC-ucxjj0XZRKtj9B_cRZokpwLg",
+            authDomain: "calendarapp-d5f9c.firebaseapp.com",
+            databaseURL: "https://calendarapp-d5f9c-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "calendarapp-d5f9c",
+            storageBucket: "calendarapp-d5f9c.appspot.com",
+            messagingSenderId: "208301182287",
+            appId: "1:208301182287:web:4eac8808801ad82bd8893a",
+            measurementId: "G-5BPVYWCBMW"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const db = getDatabase();
+        const auth = getAuth();
+        
+        async function getWeekdaysBetweenExcludingHolidays(startDate, endDate, holidays, absentDates) {
+            let count = 0;
+            let curDate = new Date(startDate);
+            while (curDate <= endDate) {
+                const dayOfWeek = curDate.getDay();
+                const isHoliday = holidays.some(holiday => 
+                    curDate >= new Date(holiday.year, holiday.monthStart - 1, holiday.dayStart) &&
+                    curDate <= new Date(holiday.year, holiday.monthEnd - 1, holiday.dayEnd)
+                );
+                const isAbsent = absentDates.some(date => curDate.toDateString() === new Date(date).toDateString());
+                if (dayOfWeek !== 0 && dayOfWeek !== 6 && !isHoliday && !isAbsent) { // Ignore weekends, holidays, and absent dates
+                    count++;
+                }
+                curDate.setDate(curDate.getDate() + 1);
+            }
+            return count;
+        }
+        
+        function calculateAttendanceTargets(totalDaysPassed, presentCount, excusedCount) {
+            const targetAttendance = 80;
+            const totalDaysNeeded = Math.ceil(totalDaysPassed * (targetAttendance / 100));
+            
+            if (totalDaysPassed === 0) {
+                return `No data available for attendance calculation.`;
+            }
+        
+            const currentAttendanceDays = presentCount + excusedCount;
+        
+            if (currentAttendanceDays < totalDaysNeeded) {
+                return `<strong>You need ${totalDaysNeeded - currentAttendanceDays} more days of attendance</strong> to reach 80% attendance.`;
+            } else {
+                // Calculate maximum allowed absences without dropping below 80% attendance
+                const maxAllowedAbsences = Math.floor((currentAttendanceDays / targetAttendance) * 100 - totalDaysPassed);
+        
+                if (maxAllowedAbsences > 0) {
+                    return `You can take <strong>${maxAllowedAbsences} more absences</strong> before falling below 80% attendance.`;
+                } else {
+                    return `Your attendance is at or above 80%. You need to maintain your current attendance level to stay above 80%.`;
+                }
+            }
+        }
+        
+        
+        function updateAttendanceData(userId) {
+            const userRef = ref(db, `users/${userId}`);
+            const holidaysRef = ref(db, 'holidays');
+        
+            Promise.all([get(userRef), get(holidaysRef)])
+            .then(async ([userSnapshot, holidaysSnapshot]) => {
+                if (userSnapshot.exists() && holidaysSnapshot.exists()) {
+                    const userData = userSnapshot.val();
+                    const holidaysData = holidaysSnapshot.val();
+                    const userName = userData.username || 'User';
+                    const datesAbsent = userData.dates_absent || [];
+                    const excusedDates = userData.excused_absent || [];
+        
+                    const today = new Date();
+                    const startOfPeriod = new Date(today.getFullYear(), 7, 12);
+                    const holidays = Object.values(holidaysData);
+        
+                    const validAbsentDates = datesAbsent.filter(date => new Date(date) <= today);
+                    const validExcusedDates = excusedDates.filter(date => new Date(date) <= today);
+        
+                    const totalDaysPassed = await getWeekdaysBetweenExcludingHolidays(startOfPeriod, today, holidays, validAbsentDates, validExcusedDates);
+        
+                    const totalDaysAttended = totalDaysPassed - validAbsentDates.length; // Only weekdays that are present
+                    const presentCount = totalDaysAttended;
+        
+                    // Attendance percentage calculation
+                    const attendancePercentage = totalDaysPassed > 0 ? Math.round(((presentCount + validExcusedDates.length) / totalDaysPassed) * 100) : 0;
+        
+                    const message = calculateAttendanceTargets(totalDaysPassed, presentCount, validExcusedDates.length);
+                    document.querySelector('.attendance-message').innerHTML = message;
+        
+                    const attendanceElement = document.getElementById('attendance-percentage');
+                    attendanceElement.style.color = attendancePercentage < 80 ? 'rgb(173, 70, 70)' : 'rgb(63, 117, 63)';
+        
+                    console.log('Total Days Passed:', totalDaysPassed);
+                    console.log('Absent Days:', validAbsentDates.length);
+                    console.log('Excused Days:', validExcusedDates.length);
+                    console.log('Present Days:', presentCount);
+                    console.log('Attendance Percentage:', attendancePercentage);
+        
+                    document.getElementById('welcome').innerText = `Welcome, ${userName}!`;
+                    document.getElementById('present-count').innerText = presentCount;
+                    document.getElementById('absent-count').innerText = validAbsentDates.length;
+                    document.getElementById('excused-absence').innerText = validExcusedDates.length; // Display excused absences
+                    document.getElementById('attendance-percentage').innerText = `${attendancePercentage}%`;
+                } else {
+                    console.log("No user or holidays data available");
+                }
+            }).catch((error) => {
+                console.error('Error fetching user or holidays data:', error);
+            });
+        }
+        
+        function displayUpcomingEvents() {
+            const eventsRef = ref(db, 'events');
+            const studentEventsRef = ref(db, 'studentevents');
+        
+            Promise.all([get(eventsRef), get(studentEventsRef)])
+            .then(([eventsSnapshot, studentEventsSnapshot]) => {
+                if (eventsSnapshot.exists() && studentEventsSnapshot.exists()) {
+                    const eventsData = eventsSnapshot.val();
+                    const studentEventsData = studentEventsSnapshot.val();
+                    console.log("Fetched events data:", eventsData);
+                    console.log("Fetched student events data:", studentEventsData);
+        
+                    const eventsTableBody = document.getElementById('events-table-body');
+                    if (!eventsTableBody) {
+                        console.error("Element with ID 'events-table-body' not found.");
+                        return;
+                    }
+        
+                    eventsTableBody.innerHTML = '';
+        
+                    const events = Object.values(eventsData).map(event => ({
+                        ...event,
+                        source: 'event'
+                    }));
+                    const studentEvents = Object.values(studentEventsData).map(event => ({
+                        ...event,
+                        source: 'studentEvent'
+                    }));
+                    const combinedEvents = events.concat(studentEvents);
+                    const today = new Date();
+                    const upcomingEvents = combinedEvents
+                        .map(event => ({
+                            ...event,
+                            eventDate: new Date(event.year, event.month - 1, event.day)
+                        }))
+                        .filter(event => event.eventDate >= today)
+                        .sort((a, b) => a.eventDate - b.eventDate);
+        
+                    console.log("Upcoming events:", upcomingEvents);
+        
+                    if (upcomingEvents.length === 0) {
+                        console.log("No upcoming events found.");
+                    } else {
+                        upcomingEvents.slice(0, 5).forEach(event => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${event.day}/${event.month}/${event.year}</td>
+                                <td>${event.title}</td>
+                                <td>${event.grade}</td>
+                                <td>${event.time}</td>
+                                <td>${event.source === 'studentEvent' ? 'Student-led Event' : 'School Event'}</td>
+                            `;
+                            eventsTableBody.appendChild(row);
+                        });
+                    }
+                } else {
+                    console.log("No events or student events data available");
+                }
+            }).catch((error) => {
+                console.error('Error fetching events or student events data:', error);
+            });
+        }
+        
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                const userId = user.uid;
+                updateAttendanceData(userId);
+                displayUpcomingEvents();
+            }
+        });
+        </script>
+        
+</body>
+</html>
+ 

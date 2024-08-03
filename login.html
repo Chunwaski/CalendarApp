@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Log in</title>
+        <link rel="stylesheet" href="login.css">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+    </head>
+    <body>
+        <div id="custom-alert" class="custom-alert hidden">
+            <div class="custom-alert-content">
+                <span id="custom-alert-message"></span>
+                <button id="custom-alert-close" class="custom-alert-button">Close</button>
+            </div>
+        </div>
+    <div class="main">
+        <div class="signup">
+            <form id="signup-form">
+                <label for="signup">Sign up</label>
+                <input type="text" id="txt" name="txt" placeholder="Name">
+                <input type="email" id="signup-email" name="email" placeholder="Email">
+                <input type="password" id="signup-pswd" name="pswd" placeholder="Password">
+                <button type="button" id="signup_button">Sign up</button>
+                <div class="link">
+                    <button type="button" id="show-login">Log in</button>
+                </div>
+            </form>
+        </div>
+        <div class="login active">
+            <form id="login-form">
+                <label for="login">Login</label>
+                <input type="email" id="login-email" name="email" placeholder="Email">
+                <input type="password" id="login-pswd" name="pswd" placeholder="Password">
+                <button type="button" id="login_button">Log in</button>
+                <div class="link">
+                    <button type="button" id="show-signup">Sign up</button>
+                </div>
+            </form>
+        </div>
+    
+    </div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-analytics.js";
+        import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-database.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyARVI4voC-ucxjj0XZRKtj9B_cRZokpwLg",
+            authDomain: "calendarapp-d5f9c.firebaseapp.com",
+            databaseURL: "https://calendarapp-d5f9c-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "calendarapp-d5f9c",
+            storageBucket: "calendarapp-d5f9c.appspot.com",
+            messagingSenderId: "208301182287",
+            appId: "1:208301182287:web:4eac8808801ad82bd8893a",
+            measurementId: "G-5BPVYWCBMW"
+        };
+    
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const db = getDatabase(app);
+        const auth = getAuth(app);
+    
+        const signupButton = document.getElementById('signup_button');
+        const loginButton = document.getElementById('login_button');
+        const customAlert = document.getElementById('custom-alert');
+        const customAlertMessage = document.getElementById('custom-alert-message');
+        const customAlertClose = document.getElementById('custom-alert-close');
+    
+        let alertTimeout;
+    
+        function showCustomAlert(message) {
+            customAlertMessage.textContent = message;
+            customAlert.classList.remove('hidden');
+    
+            // Clear any previous timeout to prevent premature hiding
+            if (alertTimeout) {
+                clearTimeout(alertTimeout);
+            }
+    
+            // Set timeout to hide alert after 5 seconds
+            alertTimeout = setTimeout(() => {
+                customAlert.classList.add('hidden');
+            }, 5000); // Hide after 5 seconds
+        }
+    
+        customAlertClose.addEventListener('click', () => {
+            customAlert.classList.add('hidden');
+            // Clear timeout when the close button is clicked
+            if (alertTimeout) {
+                clearTimeout(alertTimeout);
+            }
+        });
+    
+        function validateEmail(email) {
+    const regex = /^[a-zA-Z0-9._%+-]+@sisbschool\.com$/;
+    return regex.test(email);
+}
+
+function register() {
+    const email = document.getElementById('signup-email').value;
+    const password = document.getElementById('signup-pswd').value;
+    const username = document.getElementById('txt').value;
+
+    if (!email || !password || !username) {
+        showCustomAlert('Please fill in all fields');
+        return;
+    }
+
+    if (!validateEmail(email)) {
+        showCustomAlert('Email must end with @sisbschool.com');
+        return;
+    }
+
+    createUserWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+            const user = userCredential.user;
+
+            // Send a verification email
+            sendEmailVerification(user)
+                .then(() => {
+                    showCustomAlert('Verification email sent. Please check your inbox.');
+                    // Optionally, sign out the user to prevent access until email is verified
+                    auth.signOut();
+                })
+                .catch((error) => {
+                    showCustomAlert('Error sending verification email: ' + error.message);
+                });
+
+            // Save user data to the database
+            set(ref(db, `users/${user.uid}`), {
+                username: username,
+                email: email,
+                last_login: Date.now(),
+                dates_absent: [],
+                excused_absent: []
+            })
+            .then(() => {
+                showCustomAlert('Data added successfully');
+            })
+            .catch((error) => {
+                showCustomAlert('Error updating data: ' + error.message);
+            });
+        })
+        .catch((error) => {
+            showCustomAlert('Error creating user: ' + error.message);
+        });
+}
+
+function login() {
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-pswd').value;
+
+    if (!email || !password) {
+        showCustomAlert('Please fill in all fields');
+        return;
+    }
+
+    signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+            const user = userCredential.user;
+
+            if (user.emailVerified) {
+                set(ref(db, `users/${user.uid}/last_login`), Date.now())
+                    .then(() => {
+                        showCustomAlert('Login successful');
+                        sessionStorage.setItem('userId', user.uid);
+                        window.location.href = 'home.html';
+                    })
+                    .catch((error) => {
+                        showCustomAlert('Error updating last login: ' + error.message);
+                    });
+            } else {
+                showCustomAlert('Please verify your email address before logging in.');
+                auth.signOut();
+            }
+        })
+        .catch((error) => {
+            showCustomAlert('Error logging in: ' + error.message);
+        });
+}
+        signupButton.addEventListener('click', register);
+        loginButton.addEventListener('click', login);
+    
+        document.getElementById('show-signup').addEventListener('click', function(event) {
+            event.preventDefault();
+            document.querySelector('.login').classList.remove('active');
+            document.querySelector('.signup').classList.add('active');
+        });
+    
+        document.getElementById('show-login').addEventListener('click', function(event) {
+            event.preventDefault();
+            document.querySelector('.signup').classList.remove('active');
+            document.querySelector('.login').classList.add('active');
+        });
+    
+        // Function to add an event to the database with autogenerated keys
+        function addEvent(day, month, year, time, title, grade) {
+            const eventRef = ref(db, 'events');
+            const newEventRef = push(eventRef);
+            set(newEventRef, {
+                day: day,
+                month: month,
+                year: year,
+                time: time,
+                title: title,
+                grade: grade
+            })
+        }
+    
+            /*addEvent(14, 8, 2024, "-", "Orientation", "G7, G11");
+            addEvent(13, 8, 2024, "-", "Start of Term 1", "All");
+            addEvent(19, 8, 2024, "-", "ECAs start", "All");
+            addEvent(5, 9, 2024, "-", "Wai Kru Ceremony", "All");
+            addEvent(17, 9, 2024, "-", "Mid Autumn Festival", "All");
+            addEvent(15, 11, 2024, "-", "Loy Krathong", "All");
+            addEvent(6, 1, 2025, "-", "Start of Term 2", "All");
+            addEvent(6, 1, 2025, "-", "ECAs start", "All");
+            addEvent(27, 1, 2025, "-", "Chinese New Year Celebration", "All");
+            addEvent(4, 4, 2025, "-", "Songkran Celebration", "All");
+            addEvent(4, 4, 2025, "-", "Merit Making Ceremony", "All");
+            addEvent(21, 4, 2025, "-", "Start of Term 3", "All");
+            addEvent(13, 6, 2025, "-", "K2 Graduation Ceremony", "K2");
+            addEvent(26, 6, 2025, "-", "P6 Graduation Ceremony", "P6");
+            addEvent(27, 6, 2025, "-", "G12 & G10 Graduation Ceremony", "G10, G12");
+            addEvent(28, 10, 2024, "-", "International Week", "All");
+            addEvent(29, 10, 2024, "-", "International Week", "All");
+            addEvent(30, 10, 2024, "-", "International Week", "All");
+            addEvent(31, 10, 2024, "-", "International Week", "All");
+            addEvent(1, 11, 2024, "-", "International Week", "All");*/
+
+            function addHoliday(dayStart, monthStart, dayEnd, monthEnd, holidaytitle, year) {
+            const holidayRef = ref(db, 'holidays');
+            const newHolidayRef = push(holidayRef);
+            set(newHolidayRef, {
+                dayStart: dayStart,
+                monthStart: monthStart,
+                dayEnd: dayEnd,
+                monthEnd: monthEnd,
+                holidaytitle: holidaytitle,
+                year: year
+            })
+        }
+
+        /*addHoliday(29, 6, 11, 8, "Summer Break", 2024)
+        addHoliday(12, 8, 12, 8, "Mother's Day", 2024)
+        addHoliday(3, 10, 4, 10, "Professional Development Day", 2024)
+        addHoliday(14, 10, 14, 10, "Make up for King Rama IX's Memorial Day", 2024)
+        addHoliday(23, 10, 23, 10, "Chulalongkorn Day", 2024)
+        addHoliday(5, 12, 5, 12, "Father's Day", 2024)
+        addHoliday(10, 12, 10, 12, "Constitution Day", 2024)
+        addHoliday(14, 12, 31, 12, "Term 1 Holidays", 2024)
+        addHoliday(1, 1, 5, 1, "Term 1 Holidays", 2025)
+        addHoliday(28, 1, 4, 2, "Chinese Lunar New Year Holidays", 2025)
+        addHoliday(12, 2, 12, 2, "Makha Bucha Day", 2025)
+        addHoliday(7, 3, 7, 3, "Professional Developemnt Day", 2025)
+        addHoliday(5, 4, 20, 4, "Term 2 Holidays", 2025)
+        addHoliday(2, 5, 2, 5, "Make up for Labour Day", 2025)
+        addHoliday(5, 5, 5, 5, "Make up for King Rama X's Coronation Day", 2025)
+        addHoliday(12, 5, 12, 5, "Make up for Visakha Bucha Day", 2025)
+        addHoliday(3, 6, 3, 6, "Queen's Birthday", 2025)
+        addHoliday(28, 6, 12, 8, "Make up for Labour Day", 2025)*/
+
+        
+    function addStudentEvent(day, month, year, title, grade, time) {
+    const studenteventRef = ref(db, 'studentevents');
+    
+    const newStudentEventRef = push(studenteventRef);
+    
+    set(newStudentEventRef, {
+        day: day,
+        month: month,
+        year: year,
+        title: title,
+        grade: grade,
+        time: time
+    })
+    .then(() => {
+        console.log("Student event added successfully.");
+    })
+    .catch((error) => {
+        console.error("Error adding student event: ", error);
+    });
+}
+
+// Example usage
+//addStudentEvent(15, 8, 2024, "Science Fair", "10", "10:00 AM");
+
+      </script>
+    
+    
+    
+
+    </body>
+</html> 
