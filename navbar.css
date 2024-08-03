@@ -23,6 +23,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  z-index: 1000;
 }
 
 a {
@@ -48,6 +49,11 @@ a {
 .nav .navOpenBtn,
 .nav .navCloseBtn {
   display: none;
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+  background: none;
+  border: none;
 }
 
 /* Responsive styles */
@@ -76,13 +82,30 @@ a {
   .nav .navOpenBtn,
   .nav .navCloseBtn {
     display: block;
-    color: #fff;
-    font-size: 20px;
-    cursor: pointer;
   }
   .nav .navCloseBtn {
     position: absolute;
     top: 20px;
     right: 20px;
+  }
+}
+
+/* Small screen adjustments */
+@media screen and (max-width: 480px) {
+  .nav {
+    padding: 15px 10px;
+  }
+  .nav .logo {
+    font-size: 18px;
+  }
+  .nav .nav-links {
+    padding-top: 70px;
+  }
+  .nav .nav-links a {
+    font-size: 16px;
+  }
+  .nav .navOpenBtn,
+  .nav .navCloseBtn {
+    font-size: 20px;
   }
 }
