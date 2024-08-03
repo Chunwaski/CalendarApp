@@ -1,24 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Home</title>
-    <link rel="stylesheet" href="navbar.css" />
-    <script type="module" src="navbar.js" defer></script>
-  </head>
-  <body>
-    <nav class="nav">
-      <a href="https://sisb.ac.th/" class="logo">SISB</a>
-      <ul class="nav-links">
-        <li><a href="home.html">Home</a></li>
-        <li><a href="calendar.html">Absence Booking</a></li>
-        <li><a href="event.html">Event Calendar</a></li>
-        <li><a href="addevent.html">Add Event</a></li>
-        <li><a href="index.html" id="signOutBtn">Sign Out</a></li>
-      </ul>
-
-    </nav>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Home</title>
+  <link rel="stylesheet" href="navbar.css" />
+  <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css" />
+  <script type="module" src="navbar.js" defer></script>
+</head>
+<body>
+  <nav class="nav">
+    <a href="https://sisb.ac.th/" class="logo">SISB</a>
+    <ul class="nav-links">
+      <li><a href="home.html">Home</a></li>
+      <li><a href="calendar.html">Absence Booking</a></li>
+      <li><a href="event.html">Event Calendar</a></li>
+      <li><a href="addevent.html">Add Event</a></li>
+      <li><a href="index.html" id="signOutBtn">Sign Out</a></li>
+    </ul>
+    <button class="navOpenBtn" onclick="toggleNav()">&#9776;</button>
+  </nav>
+  <div class="overlay" onclick="toggleNav()"></div>
+</body>
 </html>
