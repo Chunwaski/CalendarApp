@@ -39,3 +39,10 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/fireba
                 document.getElementById('navbar').innerHTML = data;
             });
 
+        function toggleNav() {
+  const nav = document.querySelector('.nav');
+  const overlay = document.querySelector('.overlay');
+  nav.classList.toggle('openNav');
+  overlay.classList.toggle('showOverlay');
+}
+
