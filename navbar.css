@@ -79,26 +79,5 @@ a {
     transition: all 0.4s ease;
     z-index: 100;
   }
-  .nav.openNav .nav-links {
-    left: 0;
-  }
-  .nav .navOpenBtn {
-    display: block;
-  }
-  .overlay {
-    display: block;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 99;
-    opacity: 0;
-    transition: opacity 0.4s ease;
-  }
-  .nav.openNav ~ .overlay {
-    opacity: 1;
-  }
 }
 
