@@ -104,22 +104,29 @@
         const templateID = "template_fxacgkk";
 
         document.getElementById('myForm').addEventListener('submit', function(event) {
-            event.preventDefault(); 
+    event.preventDefault(); 
 
-            const params = {
-                name: document.getElementById("name").value,
-                grade: document.getElementById("grade").value,
-                date: document.getElementById("date").value,
-                time: document.getElementById("time").value,
-                venue: document.getElementById("venue").value,
-                description: document.getElementById("description").value,
-                username: globalUsername,
-                email: globalEmail
-            };
+    const params = {
+        name: document.getElementById("name").value,
+        grade: document.getElementById("grade").value,
+        date: document.getElementById("date").value,
+        time: document.getElementById("time").value,
+        venue: document.getElementById("venue").value,
+        description: document.getElementById("description").value,
+        username: globalUsername,
+        email: globalEmail
+    };
 
-            emailjs.send(serviceID, templateID, params)
-
+    emailjs.send(serviceID, templateID, params)
+        .then((response) => {
+            alert('Your event has been submitted successfully!');
+            window.location.href = "homepage.html";  // Replace with your actual homepage file name or URL
+        })
+        .catch((error) => {
+            console.error('Failed to send the email:', error);
+            alert('Failed to submit the event. Please try again.');
         });
+});
     </script>
 </body>
 </html>
