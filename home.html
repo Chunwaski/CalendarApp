@@ -153,7 +153,7 @@
         
                     const totalDaysPassed = await getWeekdaysBetweenExcludingHolidays(startOfPeriod, today, holidays, validAbsentDates, validExcusedDates);
         
-                    const totalDaysAttended = totalDaysPassed - validAbsentDates.length; // Only weekdays that are present
+                    const totalDaysAttended = Math.max(0, totalDaysPassed - validAbsentDates.length);
                     const presentCount = totalDaysAttended;
         
                     // Attendance percentage calculation
