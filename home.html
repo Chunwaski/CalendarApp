@@ -88,7 +88,7 @@
         const db = getDatabase();
         const auth = getAuth();
         
-        async function getWeekdaysBetweenExcludingHolidays(startDate, endDate, holidays) {
+        async function getWeekdaysBetweenExcludingHolidays(startDate, endDate, holidays, absentDates) {
             let count = 0;
             let curDate = new Date(startDate);
             while (curDate <= endDate) {
@@ -151,7 +151,7 @@
                     const validAbsentDates = datesAbsent.filter(date => new Date(date) <= today);
                     const validExcusedDates = excusedDates.filter(date => new Date(date) <= today);
         
-                    const totalDaysPassed = await getWeekdaysBetweenExcludingHolidays(startOfPeriod, today, holidays);
+                    const totalDaysPassed = await getWeekdaysBetweenExcludingHolidays(startOfPeriod, today, holidays, validAbsentDates, validExcusedDates);
         
                     const totalDaysAttended = Math.max(0, totalDaysPassed - validAbsentDates.length);
                     const presentCount = totalDaysAttended;
