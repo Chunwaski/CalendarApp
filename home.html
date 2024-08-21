@@ -151,7 +151,7 @@
                     const validAbsentDates = datesAbsent.filter(date => new Date(date) <= today);
                     const validExcusedDates = excusedDates.filter(date => new Date(date) <= today);
         
-                    const totalDaysPassed = await getWeekdaysBetweenExcludingHolidays(startOfPeriod, today, holiday);
+                    const totalDaysPassed = await getWeekdaysBetweenExcludingHolidays(startOfPeriod, today, holidays);
         
                     const totalDaysAttended = Math.max(0, totalDaysPassed - validAbsentDates.length);
                     const presentCount = totalDaysAttended;
