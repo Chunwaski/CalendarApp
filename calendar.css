@@ -384,6 +384,10 @@ input[type="file"] {
     form input[type="submit"] {
         margin-top: 20px;
     }
+
+    form select {
+        font-size: 1rem; /* Adjust font size for better readability */
+    }
 }
 
 @media (max-width: 1024px) {
@@ -394,6 +398,4 @@ input[type="file"] {
     }
 
     .form-wrapper {
-        max-width: 80%; /* Allow more width for slightly larger screens */
-    }
-}
+        max-width: 80%; /*
