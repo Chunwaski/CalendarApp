@@ -88,101 +88,115 @@
         const db = getDatabase();
         const auth = getAuth();
         
-        async function getWeekdaysBetweenExcludingHolidays(startDate, endDate, holidays, absentDates) {
-            let count = 0;
-            let curDate = new Date(startDate);
-            while (curDate <= endDate) {
-                const dayOfWeek = curDate.getDay();
-                const isHoliday = holidays.some(holiday => 
-                    curDate >= new Date(holiday.year, holiday.monthStart - 1, holiday.dayStart) &&
-                    curDate <= new Date(holiday.year, holiday.monthEnd - 1, holiday.dayEnd)
-                );
-                const isAbsent = absentDates.some(date => curDate.toDateString() === new Date(date).toDateString());
-                if (dayOfWeek !== 0 && dayOfWeek !== 6 && !isHoliday && !isAbsent) { // Ignore weekends, holidays, and absent dates
-                    count++;
-                }
-                curDate.setDate(curDate.getDate() + 1);
-            }
-            return count;
+        async function getWeekdaysBetweenExcludingHolidays(startDate, endDate, holidays) {
+    let count = 0;
+    let curDate = new Date(startDate);
+    while (curDate <= endDate) {
+        const dayOfWeek = curDate.getDay();
+        const isHoliday = holidays.some(holiday => 
+            curDate >= new Date(holiday.year, holiday.monthStart - 1, holiday.dayStart) &&
+            curDate <= new Date(holiday.year, holiday.monthEnd - 1, holiday.dayEnd)
+        );
+        if (dayOfWeek !== 0 && dayOfWeek !== 6 && !isHoliday) { // Ignore weekends and holidays
+            count++;
         }
-        
-        function calculateAttendanceTargets(totalDaysPassed, presentCount, excusedCount) {
-            const targetAttendance = 80;
-            const totalDaysNeeded = Math.ceil(totalDaysPassed * (targetAttendance / 100));
-            
-            if (totalDaysPassed === 0) {
-                return `No data available for attendance calculation.`;
-            }
-        
-            const currentAttendanceDays = presentCount + excusedCount;
-        
-            if (currentAttendanceDays < totalDaysNeeded) {
-                return `<strong>You need ${totalDaysNeeded - currentAttendanceDays} more days of attendance</strong> to reach 80% attendance.`;
-            } else {
-                // Calculate maximum allowed absences without dropping below 80% attendance
-                const maxAllowedAbsences = Math.floor((currentAttendanceDays / targetAttendance) * 100 - totalDaysPassed);
-        
-                if (maxAllowedAbsences > 0) {
-                    return `You can take <strong>${maxAllowedAbsences} more absences</strong> before falling below 80% attendance.`;
-                } else {
-                    return `Your attendance is at or above 80%. You need to maintain your current attendance level to stay above 80%.`;
-                }
-            }
+        curDate.setDate(curDate.getDate() + 1);
+    }
+    return count;
+}
+
+function calculateAttendanceTargets(totalDaysPassed, presentCount, excusedCount, absentCount) {
+    const targetAttendance = 80;
+
+    const totalRecordedDays = presentCount + excusedCount + absentCount;
+    const currentAttendancePercentage = totalRecordedDays > 0
+        ? ((presentCount + excusedCount) / totalRecordedDays) * 100
+        : 0;
+
+    if (currentAttendancePercentage < targetAttendance) {
+        let neededDays = 1;
+        let tempPresentCount = presentCount + excusedCount;
+        let tempTotalDaysPassed = totalDaysPassed;
+
+        // Increment neededDays and tempTotalDaysPassed until the attendance reaches 80%
+        while (((tempPresentCount + neededDays) / (tempTotalDaysPassed + neededDays)) * 100 < targetAttendance) {
+            neededDays++;
+            tempTotalDaysPassed++;
         }
-        
-        
-        function updateAttendanceData(userId) {
-            const userRef = ref(db, `users/${userId}`);
-            const holidaysRef = ref(db, 'holidays');
-        
-            Promise.all([get(userRef), get(holidaysRef)])
-            .then(async ([userSnapshot, holidaysSnapshot]) => {
-                if (userSnapshot.exists() && holidaysSnapshot.exists()) {
-                    const userData = userSnapshot.val();
-                    const holidaysData = holidaysSnapshot.val();
-                    const userName = userData.username || 'User';
-                    const datesAbsent = userData.dates_absent || [];
-                    const excusedDates = userData.excused_absent || [];
-        
-                    const today = new Date();
-                    const startOfPeriod = new Date(today.getFullYear(), 7, 12);
-                    const holidays = Object.values(holidaysData);
-        
-                    const validAbsentDates = datesAbsent.filter(date => new Date(date) <= today);
-                    const validExcusedDates = excusedDates.filter(date => new Date(date) <= today);
-        
-                    const totalDaysPassed = await getWeekdaysBetweenExcludingHolidays(startOfPeriod, today, holidays, validAbsentDates, validExcusedDates);
-        
-                    const totalDaysAttended = Math.max(0, totalDaysPassed - validAbsentDates.length);
-                    const presentCount = totalDaysAttended;
-        
-                    // Attendance percentage calculation
-                    const attendancePercentage = totalDaysPassed > 0 ? Math.round(((presentCount + validExcusedDates.length) / totalDaysPassed) * 100) : 0;
-        
-                    const message = calculateAttendanceTargets(totalDaysPassed, presentCount, validExcusedDates.length);
-                    document.querySelector('.attendance-message').innerHTML = message;
-        
-                    const attendanceElement = document.getElementById('attendance-percentage');
-                    attendanceElement.style.color = attendancePercentage < 80 ? 'rgb(173, 70, 70)' : 'rgb(63, 117, 63)';
-        
-                    console.log('Total Days Passed:', totalDaysPassed);
-                    console.log('Absent Days:', validAbsentDates.length);
-                    console.log('Excused Days:', validExcusedDates.length);
-                    console.log('Present Days:', presentCount);
-                    console.log('Attendance Percentage:', attendancePercentage);
-        
-                    document.getElementById('welcome').innerText = `Welcome, ${userName}!`;
-                    document.getElementById('present-count').innerText = presentCount;
-                    document.getElementById('absent-count').innerText = validAbsentDates.length;
-                    document.getElementById('excused-absence').innerText = validExcusedDates.length; // Display excused absences
-                    document.getElementById('attendance-percentage').innerText = `${attendancePercentage}%`;
-                } else {
-                    console.log("No user or holidays data available");
-                }
-            }).catch((error) => {
-                console.error('Error fetching user or holidays data:', error);
-            });
+
+        return `<strong>You need ${neededDays} more present day(s)</strong> to reach 80% attendance.`;
+    } else {
+        // Calculate the maximum number of absences allowed to maintain 80% attendance
+        const maxAllowedAbsences = Math.floor((presentCount + excusedCount) - (totalDaysPassed * targetAttendance / 100));
+
+        if (maxAllowedAbsences > 0) {
+            return `You can take <strong>${maxAllowedAbsences} more absence(s)</strong> before falling below 80% attendance.`;
+        } else {
+            return `Your attendance is at or above 80%. You need to maintain your current attendance level to stay above 80%.`;
         }
+    }
+}
+
+
+
+
+
+
+
+function updateAttendanceData(userId) {
+    const userRef = ref(db, `users/${userId}`);
+    const holidaysRef = ref(db, 'holidays');
+
+    Promise.all([get(userRef), get(holidaysRef)])
+    .then(async ([userSnapshot, holidaysSnapshot]) => {
+        if (userSnapshot.exists() && holidaysSnapshot.exists()) {
+            const userData = userSnapshot.val();
+            const holidaysData = holidaysSnapshot.val();
+            const userName = userData.username || 'User';
+            const datesAbsent = userData.dates_absent || [];
+            const excusedDates = userData.excused_absent || [];
+
+            const today = new Date();
+            const startOfPeriod = new Date(today.getFullYear(), 7, 12);
+            const holidays = Object.values(holidaysData);
+
+            const validAbsentDates = datesAbsent.filter(date => new Date(date) <= today);
+            const validExcusedDates = excusedDates.filter(date => new Date(date) <= today);
+
+            const totalDaysPassed = await getWeekdaysBetweenExcludingHolidays(startOfPeriod, today, holidays);
+            const presentCount = Math.max(0, totalDaysPassed - validAbsentDates.length);
+
+            // Calculate the correct attendance percentage
+            const totalRecordedDays = presentCount + validExcusedDates.length + validAbsentDates.length;
+            const attendancePercentage = totalRecordedDays > 0 
+                ? Math.round(((presentCount + validExcusedDates.length) / totalRecordedDays) * 100) 
+                : 0;
+
+            const message = calculateAttendanceTargets(totalDaysPassed, presentCount, validExcusedDates.length, validAbsentDates.length);
+            document.querySelector('.attendance-message').innerHTML = message;
+
+            const attendanceElement = document.getElementById('attendance-percentage');
+            attendanceElement.style.color = attendancePercentage < 80 ? 'rgb(173, 70, 70)' : 'rgb(63, 117, 63)';
+
+            console.log('Total Days Passed:', totalDaysPassed);
+            console.log('Absent Days:', validAbsentDates.length);
+            console.log('Excused Days:', validExcusedDates.length);
+            console.log('Present Days:', presentCount);
+            console.log('Attendance Percentage:', attendancePercentage);
+
+            document.getElementById('welcome').innerText = `Welcome, ${userName}!`;
+            document.getElementById('present-count').innerText = presentCount;
+            document.getElementById('absent-count').innerText = validAbsentDates.length;
+            document.getElementById('excused-absence').innerText = validExcusedDates.length; // Display excused absences
+            document.getElementById('attendance-percentage').innerText = `${attendancePercentage}%`;
+        } else {
+            console.log("No user or holidays data available");
+        }
+    }).catch((error) => {
+        console.error('Error fetching user or holidays data:', error);
+    });
+}
+
         
         function displayUpcomingEvents() {
             const eventsRef = ref(db, 'events');
@@ -255,6 +269,7 @@
             }
         });
         </script>
+
         
 </body>
 </html>
