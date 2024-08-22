@@ -370,28 +370,30 @@ input[type="file"] {
 
 /* Media Query for iPads and tablets */
 @media (max-width: 768px) {
-    .wrapper,
-    .question-wrapper,
-    .form-wrapper,
-    .completed-message {
-        width: 90%;
-        margin: 10px auto;
+    .form-wrapper {
         padding: 20px;
+        margin: 10px;
+        width: 90%;
+        max-width: none; /* Allow full width on small screens */
     }
 
-    header .current-date {
+    header {
         font-size: 1.3rem;
     }
 
-    .calendar ul li {
-        width: calc(100% / 7);
-    }
-
-    .days li {
+    form input[type="submit"] {
         margin-top: 20px;
     }
 
-    #next-page {
-        margin-left: 20px;
+    #certificateDiv,
+    .custom-file-label {
+        width: 100%;
+    }
+
+    .completed-message {
+        width: 90%;
+        max-width: none;
+        padding: 20px;
+        margin: 10px auto;
     }
 }
