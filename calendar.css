@@ -386,7 +386,8 @@ input[type="file"] {
     }
 
     form select {
-        font-size: 1rem; /* Adjust font size for better readability */
+        color: #333; /* Ensure text color is not blue */
+        background: #fff; /* Ensure background is white */
     }
 }
 
@@ -398,4 +399,11 @@ input[type="file"] {
     }
 
     .form-wrapper {
-        max-width: 80%; /*
+        max-width: 80%; /* Allow more width for slightly larger screens */
+    }
+
+    form select {
+        color: #333; /* Ensure text color is not blue */
+        background: #fff; /* Ensure background is white */
+    }
+}
