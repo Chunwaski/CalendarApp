@@ -373,6 +373,8 @@ input[type="file"] {
         padding: 20px;
         margin: 10px;
         width: 90%;
+        /* Ensure the form doesn’t have extra width constraints */
+        max-width: none; 
     }
 
     header {
@@ -381,5 +383,17 @@ input[type="file"] {
 
     form input[type="submit"] {
         margin-top: 20px;
+    }
+}
+
+@media (max-width: 1024px) {
+    /* For larger tablets or smaller desktops */
+    .wrapper {
+        width: 90%; /* Ensure the wrapper is responsive */
+        max-width: none;
+    }
+
+    .form-wrapper {
+        max-width: 80%; /* Allow more width for slightly larger screens */
     }
 }
