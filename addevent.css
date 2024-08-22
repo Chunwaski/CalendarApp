@@ -1,29 +1,29 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
 
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:'Poppins', sans-serif;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
 }
 
-body{
+body {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height:100vh;
+    min-height: 100vh;
     background: #9b9b9b;
 }
 
-
 .form-wrapper {
-    padding: 30px; 
-    margin: 20px; 
+    padding: 30px;
+    margin: 20px;
     margin-top: 30px;
-    width: 30%;
+    width: 100%;
+    max-width: 500px; /* Adjust max width for better responsiveness */
     border-radius: 10px;
-    background-color: #f9f9f9; 
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+    background-color: #f9f9f9;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 form {
@@ -35,7 +35,8 @@ form label {
     margin-bottom: 5px;
 }
 
-form input, form textarea {
+form input,
+form textarea {
     margin-bottom: 15px;
     padding: 10px;
     border: 1px solid #ccc;
@@ -59,21 +60,37 @@ form select {
 }
 
 form input[type="submit"] {
-    padding : 10px;
+    padding: 10px;
     margin-top: 30px;
     background-color: #8b6aff;
     color: #fff;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    font-weight: 500;   
+    font-weight: 500;
 }
 
 form input[type="submit"]:hover {
     background-color: #6f53cc;
 }
 
-
 .bracket {
     color: #868686;
+}
+
+/* Media Query for iPads and tablets */
+@media (max-width: 768px) {
+    .form-wrapper {
+        padding: 20px;
+        margin: 10px;
+        width: 90%;
+    }
+
+    header {
+        font-size: 1.3rem;
+    }
+
+    form input[type="submit"] {
+        margin-top: 20px;
+    }
 }
