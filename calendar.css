@@ -1,129 +1,130 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
 *{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
 }
 
 body{
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height:100vh;
+    min-height: 100vh;
     background: #9b9b9b;
 }
 
 .wrapper {
-    width: 600px;
+    width: 100%;
+    max-width: 600px;
     background: #fff;
     border-radius: 10px;
-    padding: 20px; /* Optional: add some padding for better spacing */
-    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+    padding: 20px;
+    box-sizing: border-box;
 }
 
-.wrapper header{
-    display:flex;
-    align-items:center;
+.wrapper header {
+    display: flex;
+    align-items: center;
     padding: 25px 30px 10px;
     margin-top: 10px;
     margin-left: 20px;
     justify-content: space-between;
 }
 
-header .current-date{
+header .current-date {
     font-size: 1.45rem;
     font-weight: 500;
 }
 
-header .icons span{
+header .icons span {
     height: 38px;
     width: 38px;
     color: #878787;
     font-size: 1.9rem;
     margin: 0 1px;
-    cursor:pointer; 
-    text-align:center;  
-    line-height:38px;
+    cursor: pointer;
+    text-align: center;
+    line-height: 38px;
     border-radius: 50%;
 }
 
-header .icons span:hover{
+header .icons span:hover {
     background: #f2f2f2;
 }
 
-header .icons span:last-child{
+header .icons span:last-child {
     margin-right: -10px;
 }
 
-.calendar{
+.calendar {
     padding: 20px;
 }
 
-.calendar ul{
-    display:flex;
-    list-style:none;
-    flex-wrap:wrap;
-    text-align:center;
+.calendar ul {
+    display: flex;
+    list-style: none;
+    flex-wrap: wrap;
+    text-align: center;
 }
 
-.calendar .days li{
+.calendar .days li {
     margin-bottom: 20px;
 }
 
-.calendar .weeks li{
-    font-weight:500;
+.calendar .weeks li {
+    font-weight: 500;
 }
 
-.calendar ul li{
+.calendar ul li {
     position: relative;
     width: calc(100%/7);
 }
 
 .calendar .days li {
-    z-index:1;
-    cursor:pointer;
+    z-index: 1;
+    cursor: pointer;
     margin-top: 30px;
 }
 
-.days li.inactive{
+.days li.inactive {
     color: #aaa;
 }
 
-.days li.active{
+.days li.active {
     color: #fff;
 }
 
-.days li.selected{
+.days li.selected {
     color: #fff;
 }
 
 .days li.disabled {
-    pointer-events: none; 
+    pointer-events: none;
     color: #333;
 }
 
 .days li.holiday {
-    color:#aaa;
+    color: #aaa;
 }
 
-.calendar .days li::before{
-    position:absolute;
+.calendar .days li::before {
+    position: absolute;
     content: "";
-    height:40px;
-    width:40px;
-    top:50%;
-    left:50%;
+    height: 40px;
+    width: 40px;
+    top: 50%;
+    left: 50%;
     border-radius: 50%;
-    z-index:-1;
+    z-index: -1;
     transform: translate(-50%, -50%);
 }
 
-.days li:hover::before{
-    background:#f2f2f2;
+.days li:hover::before {
+    background: #f2f2f2;
 }
 
-.days li.active::before{
+.days li.active::before {
     background: #777777 !important;
 }
 
@@ -131,20 +132,20 @@ header .icons span:last-child{
     background: #8b6aff;
 }
 
-.days li.disabled::before{
-    background:#f8e0e0;
+.days li.disabled::before {
+    background: #f8e0e0;
 }
 
 .days li.excused::before {
-    background: #fdefd5; 
+    background: #fdefd5;
 }
 
-.days li.present::before{
-    background: #e1fce4
+.days li.present::before {
+    background: #e1fce4;
 }
 
-.days li.weekend::before{
-    background:transparent !important;
+.days li.weekend::before {
+    background: transparent !important;
 }
 
 .days li.weekend:hover::before {
@@ -154,7 +155,6 @@ header .icons span:last-child{
 .days li.holiday::before {
     pointer-events: none;
     background: #ebebeb;
-
 }
 
 #next-page {
@@ -167,31 +167,23 @@ header .icons span:last-child{
     text-align: center;
     line-height: 38px;
     border-radius: 50%;
-    margin-left: 30px; 
+    margin-left: 30px;
 }
 
 #next-page:hover {
     background: #f2f2f2;
 }
-.question-wrapper {
-    display: none; /* Initially hidden */
-    padding: 30px; 
-    margin: 20px; 
-    width: 30%;
-    border-radius: 10px;
-    background-color: #f9f9f9; 
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
-}
 
 .question-wrapper {
-    display: none; /* Initially hidden */
-    padding: 30px; 
-    margin: 20px auto; 
-    width: 30%;
+    display: none;
+    padding: 30px;
+    margin: 20px auto;
+    width: 100%;
+    max-width: 500px;
     border-radius: 10px;
-    background-color: #f9f9f9; 
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
-    text-align: center; /* Center align text */
+    background-color: #f9f9f9;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
 }
 
 .question-wrapper header {
@@ -208,8 +200,8 @@ header .icons span:last-child{
     color: white;
     cursor: pointer;
     transition: background-color 0.3s ease;
-    width: 100px; /* Fixed width for buttons */
-    margin: 5px; /* Margin between buttons */
+    width: 100px;
+    margin: 5px;
 }
 
 .question-wrapper button:hover {
@@ -218,12 +210,13 @@ header .icons span:last-child{
 
 .form-wrapper {
     display: none;
-    padding: 30px; 
-    margin: 20px; 
-    width: 30%;
+    padding: 30px;
+    margin: 20px;
+    width: 100%;
+    max-width: 500px;
     border-radius: 10px;
-    background-color: #f9f9f9; 
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+    background-color: #f9f9f9;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 form {
@@ -235,7 +228,8 @@ form label {
     margin-bottom: 5px;
 }
 
-form input, form textarea {
+form input,
+form textarea {
     margin-bottom: 15px;
     padding: 10px;
     border: 1px solid #ccc;
@@ -259,13 +253,13 @@ form select {
 }
 
 form input[type="submit"] {
-    padding : 10px;
+    padding: 10px;
     background-color: #8b6aff;
     color: #fff;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    font-weight: 500;   
+    font-weight: 500;
 }
 
 form input[type="submit"]:hover {
@@ -294,13 +288,13 @@ input[type="file"] {
     border: 1px dashed #ccc;
     border-radius: 5px;
     background-color: #eef;
-    text-align: center; /* Center align the content inside the div */
-    display: none; /* Initially hide the div */
+    text-align: center;
+    display: none;
 }
 
 #certificateLabel {
     margin-bottom: 5px;
-    display: none; /* Initially hide the label */
+    display: none;
 }
 
 .custom-file-input {
@@ -331,45 +325,73 @@ input[type="file"] {
 }
 
 .custom-file-label.disabled {
-    background-color: #e9ecef; 
+    background-color: #e9ecef;
     color: rgb(87, 85, 85);
     cursor: not-allowed;
-    pointer-events: none; 
+    pointer-events: none;
 }
 
 .bracket {
     color: #868686;
 }
 
-
 #selectedDates {
-    padding: 5px; /* Internal spacing */
-    margin-bottom: 20px; /* External spacing */
+    padding: 5px;
+    margin-bottom: 20px;
     background-color: #F3E5F5;
     border-radius: 5px;
     display: inline-block;
 }
 
 .completed-message {
-    width: 30%;
+    width: 100%;
+    max-width: 500px;
     display: none;
     font-size: 1.5em;
     color: rgb(78, 78, 78);
     text-align: center;
     padding: 40px;
     border-radius: 10px;
-    background-color: #f9f9f9; 
+    background-color: #f9f9f9;
     margin: 20px;
 }
 
 .completed-message img {
-    width: 25%; /* Adjust size of the checkmark image */
+    width: 25%;
     height: 25%;
     display: block;
-    margin: 0 auto 10px; 
-    padding-bottom: 20px
+    margin: 0 auto 10px;
+    padding-bottom: 20px;
 }
 
-#submit{
-    margin-top: 20px
+#submit {
+    margin-top: 20px;
+}
+
+/* Media Query for iPads and tablets */
+@media (max-width: 768px) {
+    .wrapper,
+    .question-wrapper,
+    .form-wrapper,
+    .completed-message {
+        width: 90%;
+        margin: 10px auto;
+        padding: 20px;
+    }
+
+    header .current-date {
+        font-size: 1.3rem;
+    }
+
+    .calendar ul li {
+        width: calc(100% / 7);
+    }
+
+    .days li {
+        margin-top: 20px;
+    }
+
+    #next-page {
+        margin-left: 20px;
+    }
 }
