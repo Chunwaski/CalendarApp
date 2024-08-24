@@ -220,13 +220,11 @@ function displayUpcomingEvents() {
 
             const events = Object.values(eventsData).map(event => ({
                 ...event,
-                source: 'event',
-                eventEndDate: new Date(event.year, event.monthEnd - 1, event.dayEnd)
+                source: 'event'
             }));
             const studentEvents = Object.values(studentEventsData).map(event => ({
                 ...event,
-                source: 'studentEvent',
-                eventEndDate: new Date(event.year, event.monthEnd - 1, event.dayEnd)
+                source: 'studentEvent'
             }));
             const combinedEvents = events.concat(studentEvents);
             const today = new Date();
@@ -241,15 +239,21 @@ function displayUpcomingEvents() {
 
             console.log("Upcoming events:", upcomingEvents);
 
-            // Filter out multi-day events so only the first occurrence is shown
-            const filteredEvents = upcomingEvents.filter((event, index, self) =>
-                index === self.findIndex(e => e.title === event.title && e.eventDate.getTime() === event.eventDate.getTime())
-            );
+            // Group events by title and select only the first occurrence based on the earliest date
+            const uniqueEventsMap = new Map();
 
-            if (filteredEvents.length === 0) {
+            upcomingEvents.forEach(event => {
+                if (!uniqueEventsMap.has(event.title) || uniqueEventsMap.get(event.title).eventDate > event.eventDate) {
+                    uniqueEventsMap.set(event.title, event);
+                }
+            });
+
+            const uniqueEvents = Array.from(uniqueEventsMap.values());
+
+            if (uniqueEvents.length === 0) {
                 console.log("No upcoming events found.");
             } else {
-                filteredEvents.slice(0, 5).forEach(event => {
+                uniqueEvents.slice(0, 5).forEach(event => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td>${event.day}/${event.month}/${event.year}</td>
@@ -268,6 +272,7 @@ function displayUpcomingEvents() {
         console.error('Error fetching events or student events data:', error);
     });
 }
+
         
         onAuthStateChanged(auth, (user) => {
             if (user) {
