@@ -35,17 +35,18 @@ body {
     justify-content: space-between;
     align-items: center;
     z-index: 1000;
-  }
+}
   
-  a {
+a {
     color: #fff;
     text-decoration: none;
-  }
+}
   
-  .nav .logo {
+.nav .logo {
     font-size: 22px;
     font-weight: 500;
-  }
+}
+
 .signup, .login {
     padding: 30px;
     display: none;
