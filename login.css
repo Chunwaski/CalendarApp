@@ -15,14 +15,6 @@ body {
     background: #9b9b9b;
 }
 
-.main {
-    width: 450px;
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-}
-
 .nav {
     position: fixed;
     top: 0;
@@ -35,16 +27,23 @@ body {
     justify-content: space-between;
     align-items: center;
     z-index: 1000;
-}
+  }
   
-a {
+  a {
     color: #fff;
     text-decoration: none;
-}
+  }
   
-.nav .logo {
+  .nav .logo {
     font-size: 22px;
     font-weight: 500;
+  }
+.main {
+    width: 450px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
 }
 
 .signup, .login {
