@@ -198,68 +198,76 @@ function updateAttendanceData(userId) {
 }
 
         
-        function displayUpcomingEvents() {
-            const eventsRef = ref(db, 'events');
-            const studentEventsRef = ref(db, 'studentevents');
-        
-            Promise.all([get(eventsRef), get(studentEventsRef)])
-            .then(([eventsSnapshot, studentEventsSnapshot]) => {
-                if (eventsSnapshot.exists() && studentEventsSnapshot.exists()) {
-                    const eventsData = eventsSnapshot.val();
-                    const studentEventsData = studentEventsSnapshot.val();
-                    console.log("Fetched events data:", eventsData);
-                    console.log("Fetched student events data:", studentEventsData);
-        
-                    const eventsTableBody = document.getElementById('events-table-body');
-                    if (!eventsTableBody) {
-                        console.error("Element with ID 'events-table-body' not found.");
-                        return;
-                    }
-        
-                    eventsTableBody.innerHTML = '';
-        
-                    const events = Object.values(eventsData).map(event => ({
-                        ...event,
-                        source: 'event'
-                    }));
-                    const studentEvents = Object.values(studentEventsData).map(event => ({
-                        ...event,
-                        source: 'studentEvent'
-                    }));
-                    const combinedEvents = events.concat(studentEvents);
-                    const today = new Date();
-                    const upcomingEvents = combinedEvents
-                        .map(event => ({
-                            ...event,
-                            eventDate: new Date(event.year, event.month - 1, event.day)
-                        }))
-                        .filter(event => event.eventDate >= today)
-                        .sort((a, b) => a.eventDate - b.eventDate);
-        
-                    console.log("Upcoming events:", upcomingEvents);
-        
-                    if (upcomingEvents.length === 0) {
-                        console.log("No upcoming events found.");
-                    } else {
-                        upcomingEvents.slice(0, 5).forEach(event => {
-                            const row = document.createElement('tr');
-                            row.innerHTML = `
-                                <td>${event.day}/${event.month}/${event.year}</td>
-                                <td>${event.title}</td>
-                                <td>${event.grade}</td>
-                                <td>${event.time}</td>
-                                <td>${event.source === 'studentEvent' ? 'Student-led Event' : 'School Event'}</td>
-                            `;
-                            eventsTableBody.appendChild(row);
-                        });
-                    }
-                } else {
-                    console.log("No events or student events data available");
-                }
-            }).catch((error) => {
-                console.error('Error fetching events or student events data:', error);
-            });
+function displayUpcomingEvents() {
+    const eventsRef = ref(db, 'events');
+    const studentEventsRef = ref(db, 'studentevents');
+
+    Promise.all([get(eventsRef), get(studentEventsRef)])
+    .then(([eventsSnapshot, studentEventsSnapshot]) => {
+        if (eventsSnapshot.exists() && studentEventsSnapshot.exists()) {
+            const eventsData = eventsSnapshot.val();
+            const studentEventsData = studentEventsSnapshot.val();
+            console.log("Fetched events data:", eventsData);
+            console.log("Fetched student events data:", studentEventsData);
+
+            const eventsTableBody = document.getElementById('events-table-body');
+            if (!eventsTableBody) {
+                console.error("Element with ID 'events-table-body' not found.");
+                return;
+            }
+
+            eventsTableBody.innerHTML = '';
+
+            const events = Object.values(eventsData).map(event => ({
+                ...event,
+                source: 'event',
+                eventEndDate: new Date(event.year, event.monthEnd - 1, event.dayEnd)
+            }));
+            const studentEvents = Object.values(studentEventsData).map(event => ({
+                ...event,
+                source: 'studentEvent',
+                eventEndDate: new Date(event.year, event.monthEnd - 1, event.dayEnd)
+            }));
+            const combinedEvents = events.concat(studentEvents);
+            const today = new Date();
+
+            const upcomingEvents = combinedEvents
+                .map(event => ({
+                    ...event,
+                    eventDate: new Date(event.year, event.month - 1, event.day)
+                }))
+                .filter(event => event.eventDate >= today)
+                .sort((a, b) => a.eventDate - b.eventDate);
+
+            console.log("Upcoming events:", upcomingEvents);
+
+            // Filter out multi-day events so only the first occurrence is shown
+            const filteredEvents = upcomingEvents.filter((event, index, self) =>
+                index === self.findIndex(e => e.title === event.title && e.eventDate.getTime() === event.eventDate.getTime())
+            );
+
+            if (filteredEvents.length === 0) {
+                console.log("No upcoming events found.");
+            } else {
+                filteredEvents.slice(0, 5).forEach(event => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${event.day}/${event.month}/${event.year}</td>
+                        <td>${event.title}</td>
+                        <td>${event.grade}</td>
+                        <td>${event.time}</td>
+                        <td>${event.source === 'studentEvent' ? 'Student-led Event' : 'School Event'}</td>
+                    `;
+                    eventsTableBody.appendChild(row);
+                });
+            }
+        } else {
+            console.log("No events or student events data available");
         }
+    }).catch((error) => {
+        console.error('Error fetching events or student events data:', error);
+    });
+}
         
         onAuthStateChanged(auth, (user) => {
             if (user) {
