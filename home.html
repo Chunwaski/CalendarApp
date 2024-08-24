@@ -207,8 +207,6 @@ function displayUpcomingEvents() {
         if (eventsSnapshot.exists() && studentEventsSnapshot.exists()) {
             const eventsData = eventsSnapshot.val();
             const studentEventsData = studentEventsSnapshot.val();
-            console.log("Fetched events data:", eventsData);
-            console.log("Fetched student events data:", studentEventsData);
 
             const eventsTableBody = document.getElementById('events-table-body');
             if (!eventsTableBody) {
@@ -237,13 +235,12 @@ function displayUpcomingEvents() {
                 .filter(event => event.eventDate >= today)
                 .sort((a, b) => a.eventDate - b.eventDate);
 
-            console.log("Upcoming events:", upcomingEvents);
-
-            // Group events by title and select only the first occurrence based on the earliest date
+            // Group events by title and only keep the earliest date
             const uniqueEventsMap = new Map();
 
             upcomingEvents.forEach(event => {
-                if (!uniqueEventsMap.has(event.title) || uniqueEventsMap.get(event.title).eventDate > event.eventDate) {
+                const existingEvent = uniqueEventsMap.get(event.title);
+                if (!existingEvent || existingEvent.eventDate > event.eventDate) {
                     uniqueEventsMap.set(event.title, event);
                 }
             });
@@ -272,6 +269,7 @@ function displayUpcomingEvents() {
         console.error('Error fetching events or student events data:', error);
     });
 }
+
 
         
         onAuthStateChanged(auth, (user) => {
