@@ -23,6 +23,29 @@ body {
     overflow: hidden;
 }
 
+.nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 15px 50px;
+    background: #4e4e4e;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  a {
+    color: #fff;
+    text-decoration: none;
+  }
+  
+  .nav .logo {
+    font-size: 22px;
+    font-weight: 500;
+  }
 .signup, .login {
     padding: 30px;
     display: none;
